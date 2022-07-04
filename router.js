@@ -21,6 +21,10 @@ router.post('/createpost',auth, controller.createPost);
 router.get('/getallpost',controller.getAllPost);
 router.post('/profile',auth,controller.userProfile);
 
+router.post('/follow',auth,controller.addFollower);
+router.post('/unfollow',auth,controller.unFollower);
+
+
 router.post('/register', controller.register);
 router.post('/login', controller.login);
 

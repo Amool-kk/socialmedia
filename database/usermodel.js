@@ -19,12 +19,10 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now()
     },
-    followers: {
-        type: String
-    },
-    follwing: {
-        type: String
-    },
+    followers: [{type: String}
+    ],
+    follwing: [{type: String}
+    ],
     tokens: [{
         tokenid: {
             type: String,

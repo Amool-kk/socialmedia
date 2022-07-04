@@ -1,6 +1,7 @@
 const userDB = require('../database/usermodel');
 const bcrypt = require('bcrypt');
-const post = require('../database/postmodel')
+const post = require('../database/postmodel');
+const { addListener } = require('../database/postmodel');
 
 
 exports.all = async (req, res) => {
@@ -11,15 +12,15 @@ exports.all = async (req, res) => {
 
 
 exports.userProfile = async (req, res) => {
-    // const username = req.user.username;
     const profile = req.body.username.split(':')[1];
-    // console.log(profile,username)
     const allPost = await post.find({ username: profile });
     const user = await userDB.find({ username: profile });
 
-    console.log(profile)
+    const {username,followers,follwing} = user[0];
 
-    res.status(200).send({ message: [allPost, user] });
+    const data = [{username,followers,follwing}];
+
+    res.status(200).send({ message: [allPost, data] });
 }
 
 exports.getAllPost = async (req, res) => {
@@ -77,6 +78,84 @@ exports.createComment = async (req, res) => {
 
 }
 
+exports.addFollower = async (req, res) => {
+    const { data } = req.body;
+    const username = req.user.username;
+
+    console.log(data, username, req.body)
+    const user = await userDB.find({ username });
+    const user2 = await userDB.find({ username: data });
+    // amool - rudra
+    let follwing = [...user[0].follwing,data];
+    let followers = [...user2[0].followers,username];
+
+    console.log(follwing," line 88")
+
+    const addfollwing = await userDB.updateOne(
+        { username: username },
+        {
+            $push: {
+                follwing: data
+            }
+        }
+    )
+
+    const addfollower = await userDB.updateOne(
+        { username: data },
+        {
+            $push: {
+                followers: username
+            }
+        }
+    )
+
+    console.log(follwing, followers," line 108")
+    res.status(200).send({ message: "Follow request accepted" })
+}
+
+exports.unFollower = async (req, res) => {
+    const { data } = req.body;
+    const username = req.user.username;
+
+    console.log(data, username, req.body)
+    const user = await userDB.find({ username });
+    const user2 = await userDB.find({ username: data });
+    // amool - rudra
+    let follwing = user[0].follwing;
+    let followers = user2[0].followers;
+    console.log(follwing, followers, "line 2", follwing.indexOf(`${data}`))
+    if (follwing.indexOf(`${data}`) > -1) {
+        let index = follwing.indexOf(`${data}`)
+        follwing.splice(index, 1)
+    }
+    if (followers.indexOf(`${username}`) > -1) {
+        let index = followers.indexOf(`${username}`)
+        followers.splice(index, 1)
+    }
+    console.log(follwing, followers, "line")
+
+    const unfollwing = await userDB.updateOne(
+        { username: username },
+        {
+            $pull: {
+                follwing: data
+            }
+        }
+    )
+
+    console.log(unfollwing)
+
+    const unfollower = await userDB.updateOne(
+        { username: data },
+        {
+            $pull: {
+                followers: username
+            }
+        }
+    )
+    res.status(200).send({ message: "UnFollow request accepted" })
+}
+
 
 function makeid(length) {
     var result = '';
@@ -108,8 +187,8 @@ exports.register = async (req, res) => {
 
     const user = new userDB({
         email, username, password,
-        followers: 0,
-        follwing: 0
+        followers: [],
+        follwing: []
     })
 
     const result = await user.save();
