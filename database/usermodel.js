@@ -9,7 +9,7 @@ const userSchema = new mongoose.Schema({
     },
     username: {
         type: String,
-        unique : true
+        unique: true
     },
     password: {
         type: String,
@@ -18,6 +18,12 @@ const userSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now()
+    },
+    followers: {
+        type: String
+    },
+    follwing: {
+        type: String
     },
     tokens: [{
         tokenid: {

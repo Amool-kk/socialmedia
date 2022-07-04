@@ -9,6 +9,10 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    username: {
+        type: String,
+        required: true
+    },
     image: {
         type: String
     },
@@ -18,9 +22,15 @@ const postSchema = new mongoose.Schema({
     text: {
         type: String
     },
-    date:{
+    like:{
+        type: String
+    },
+    comment : {
+        type : String
+    },
+    date: {
         type: Date,
-        default : Date.now
+        default: Date.now
     }
 })
 
