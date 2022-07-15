@@ -1,10 +1,15 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ThumbUpIcon from '@mui/icons-material/ThumbUp';
 import './createpost.css'
+
+
+
 const CreatePost = () => {
 
     const [selectedImage, setSelectedImage] = useState(null);
     const [message, setMessage] = useState(null);
+    const [video,addVideo] = useState(null);
     const [data, setData] = useState([])
     // const [classs, setClasss] = useState();
     const navigate = useNavigate();
@@ -22,7 +27,10 @@ const CreatePost = () => {
         const result = await res.json()
         // console.log(result)
         if (res.status === 200) {
-            setData(result.message)
+            const temp = result.message;
+            temp.reverse()
+            setData(temp)
+            console.log(temp)
         }
     }, [setData])
 
@@ -44,6 +52,12 @@ const CreatePost = () => {
             window.alert("Write something for post")
             return 0;
         }
+        console.log(selectedImage)
+
+        const formData = new FormData();
+        formData.append('text',message);
+        formData.append('image',selectedImage);
+        formData.append('video',video);
 
         const res = fetch(`${process.env.REACT_APP_SERVER_URL}/createpost`, {
             method: "POST",
@@ -52,7 +66,9 @@ const CreatePost = () => {
             },
             credentials: "include",
             body: JSON.stringify({
-                text: message
+                text: message,
+                image: selectedImage,
+                video : video
             })
         })
         // const result = (await res).json
@@ -62,10 +78,30 @@ const CreatePost = () => {
 
     }
 
+    const like = async (e)=>{
+        console.log(e.target.className)
+        const postID = data[e.target.className].postID;
+
+        const res = await fetch(`${process.env.REACT_APP_SERVER_URL}/like`,{
+            method: "POST",
+            headers: {
+                "Content-Type":"application/json"
+            },
+            credentials : "include",
+            body: JSON.stringify({
+                postID
+            })
+        })
+
+        if((res).status === 200){
+            getAllpost()
+        }
+    }
+
     return (
         <>
             <div className="Post">
-                <form>
+                <form encType="multipart/form-data">
                     <div className="items" style={{ width: "100%" }}>
                         <textarea type="text" placeholder="Write something here..." onInput={e => auto_grow(e)}></textarea>
                     </div>
@@ -96,7 +132,6 @@ const CreatePost = () => {
                     <div className="items">
                         <button className="btn third" style={{ display: "unset" }} onClick={(e) => postMessage(e)}>Post</button>
                     </div>
-
                 </form>
             </div>
             <div className="postdisplay">
@@ -118,7 +153,7 @@ const CreatePost = () => {
                             <div className="social">
                                 <div className="social-content"></div>
                                 <div className="social-buttons">
-                                    <span><i className="fa fa-thumbs-up"></i>Like</span>
+                                    <span onClick={(e)=>like(e)} className={i} ><ThumbUpIcon style={{fontSize:"17px",marginRight: "4px"}} />Like {item.like.length}</span>
                                     <span><i className="fa fa-comment"></i>Comment</span>
                                     {/* <span><i className="fa fa-share"></i>Share</span> */}
                                 </div>

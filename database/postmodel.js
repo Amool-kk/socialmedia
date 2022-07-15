@@ -22,9 +22,8 @@ const postSchema = new mongoose.Schema({
     text: {
         type: String
     },
-    like:{
-        type: String
-    },
+    like:[{type: String}
+    ],
     comment : {
         type : String
     },
